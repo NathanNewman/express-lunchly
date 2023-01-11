@@ -26,7 +26,7 @@ class Customer {
        FROM customers
        ORDER BY last_name, first_name`
     );
-    return results.rows.map(c => new Customer(c));
+    return results.rows.map((c) => new Customer(c));
   }
 
   /** get a customer by ID. */
@@ -81,6 +81,34 @@ class Customer {
   fullName() {
     const name = `${this.firstName} ${this.lastName}`;
     return name;
+  }
+  static async searchCustomer(firstName, lastName) {
+    if (!lastName) {
+      const custFirstName = await db.query(
+        `SELECT id, first_name AS "firstName", last_name AS "lastName", phone, notes 
+          FROM customers 
+          WHERE first_name LIKE $1`,
+        [firstName]
+      );
+      const custLastName = await db.query(
+        `SELECT id, first_name AS "firstName", last_name AS "lastName", phone, notes 
+          FROM customers
+          WHERE last_name LIKE $1`,
+        [firstName]
+      );
+      const customers = custFirstName.rows.concat(custLastName.rows);
+      console.log(customers);
+      return customers.map((c) => new Customer(c));
+    }
+    else {
+      const customers = await db.query(
+        `SELECT id, first_name AS "firstName", last_name AS "lastName", phone, notes 
+          FROM customers
+          WHERE first_name LIKE $1 AND last_name LIKE $2`,
+        [firstName, lastName]
+      );
+      return customers.rows.map((c) => new Customer(c));
+    }
   }
 }
 

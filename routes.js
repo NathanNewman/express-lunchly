@@ -12,6 +12,7 @@ const router = new express.Router();
 router.get("/", async function(req, res, next) {
   try {
     const customers = await Customer.all();
+    console.log(customers);
     return res.render("customer_list.html", { customers });
   } catch (err) {
     return next(err);
@@ -41,6 +42,17 @@ router.post("/add/", async function(req, res, next) {
     await customer.save();
 
     return res.redirect(`/${customer.id}/`);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get("/search/", async function(req, res, next) {
+  try {
+    const [ firstName, lastName ] = req.query.name.split(" ");
+    const customers = await Customer.searchCustomer(firstName, lastName);
+    console.log(customers);
+    return res.render("customer_list.html", { customers });
   } catch (err) {
     return next(err);
   }
@@ -107,15 +119,6 @@ router.post("/:id/add-reservation/", async function(req, res, next) {
     await reservation.save();
 
     return res.redirect(`/${customerId}/`);
-  } catch (err) {
-    return next(err);
-  }
-});
-
-router.get("/search/", async function(req, res, next) {
-  try {
-    const customer = req.body.name;
-    console.log(customer);
   } catch (err) {
     return next(err);
   }
